@@ -4,7 +4,8 @@ import h5py
 import json
 import os
 import re
-
+import sys
+import traceback
 
 def get_algorithm_name(name, batch_mode):
     if batch_mode:
@@ -69,7 +70,8 @@ def load_all_results(dataset=None, count=None, split_batched=False,
                         pass
                 yield properties, f
                 f.close()
-            except:
+            except Exception:
+                traceback.print_exc()
                 pass
 
 

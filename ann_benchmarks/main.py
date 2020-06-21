@@ -216,6 +216,7 @@ def main():
                 run(definition, args.dataset, args.count, args.runs,
                     args.batch)
             else:
+                print(args.local)
                 run_docker(definition, args.dataset, args.count,
                            args.runs, args.timeout, args.batch, str(args.cpu_number))
         except KeyboardInterrupt:

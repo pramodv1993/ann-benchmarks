@@ -4,7 +4,7 @@ mpl.use('Agg')  # noqa
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
-
+import traceback
 from ann_benchmarks.datasets import get_dataset
 from ann_benchmarks.algorithms.definitions import get_definitions
 from ann_benchmarks.plotting.metrics import all_metrics as metrics
@@ -111,6 +111,8 @@ if __name__ == "__main__":
         print('writing output to %s' % args.output)
 
     dataset = get_dataset(args.dataset)
+    attrs = [k for k in dataset.keys()]
+    print('attrs in dataset',attrs)
     count = int(args.count)
     unique_algorithms = get_unique_algorithms()
     results = load_all_results(args.dataset, count, True, args.batch)
