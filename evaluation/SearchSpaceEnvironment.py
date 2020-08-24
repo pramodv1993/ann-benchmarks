@@ -1,4 +1,3 @@
-#environment that evaluates the approximate KNNS algorithms for a given test point
 import cudf
 from cuml.neighbors import NearestNeighbors as cuml_NN
 from sklearn.neighbors import NearestNeighbors as sklearn_NN
@@ -22,10 +21,11 @@ class SearchSpaceEnvironment:
     self.curr_state = np.concatenate((self.test_point,
                                       self.init_mu,
                                       self.init_covar, [0]))
-    print("Fitting the training points..")
+    print("Fitting training points to the true and approximate methods..")
     self.true_nn = cuml_NN()
-    self.true_nn.fit(train_points)
-
+    train_pts_gpu = cudf.DataFrame.from_gpu_matrix(train_points)
+    self.true_nn.fit(train_pts_gpu)
+    self.target_algorithm.fit(train_points)
     if len(self.init_covar) != self.dim *(self.dim +1)/2:
       raise Exception('Insufficient unique elements specified for covariance matrix')
 
@@ -43,8 +43,10 @@ class SearchSpaceEnvironment:
     return np.random.multivariate_normal(mean, full_covar_matrix, sample_size)
 
   def evaluate_points(self, sampled_points, **kwargs):
-    true_distances, true_neighbors_indices = self.true_nn.kneighbors(sampled_points, self.k)#slow
-    approx_neighbors = self.target_algorithm(sampled_points, self.k, **kwargs)#slow
+    print("Querying true neighbors for the sampled points..")
+    true_distances, true_neighbors_indices = self.true_nn.kneighbors(sampled_points, self.k)
+    print("Querying approximate neighbors for the sampled points..")
+    approx_neighbors = self.target_algorithm.query(sampled_points, self.k)
     num_fps = 0
     for true_neighbors_of_point, approx_neighbors_of_point in zip(true_neighbors, approx_neighbors):
       #order of true neighbors has to retained
